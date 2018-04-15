@@ -11,7 +11,8 @@
 using namespace std;
 
 class TreasureHunt {
-    public:int **map;
+protected:
+    int **map;
     int rows, columns;
     Hunter hunters[4];
     int hunterCount;
@@ -24,13 +25,25 @@ class TreasureHunt {
     void addTreasure();
     int moveHunter(int);
     bool hunterCanMove(int);
+    virtual void createMap(int, int) = 0;
 public:
-    void createMap(int, int);
     TreasureHunt();
     TreasureHunt(int, int);
     ~TreasureHunt();
     int getHunterScore(int);
     bool runOneRound();
     void run();
-    friend ostream& operator<<(ostream&, const TreasureHunt&);
+    friend ostream& operator<<(ostream&, TreasureHunt&);
+};
+
+class TreasureHuntNormal : public TreasureHunt {
+public:
+    TreasureHuntNormal(int, int);
+    void createMap(int, int);
+};
+
+class TreasureHuntObs : public TreasureHunt {
+public:
+    TreasureHuntObs(int, int);
+    void createMap(int, int);
 };

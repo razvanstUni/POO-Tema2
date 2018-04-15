@@ -4,7 +4,9 @@
 
 #include "TreasureHunt.h"
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+using namespace std;
 
 void TreasureHunt::init() {
     this->hunterCount = 0;
@@ -43,11 +45,11 @@ ostream& operator<<(ostream& os, TreasureHunt& t)
     for(i=0;i<HUNTERS;i++)
         if(t.hunters[i].isActive()) activeHunters++;
 
-    cout << "--- Active hunters: " << activeHunters << " - Treasures left: " << t.treasureCount << " ---\n";
+    os << "--- Active hunters: " << activeHunters << " - Treasures left: " << t.treasureCount << " ---\n";
     for(i=0;i<t.rows;i++) {
         for(j=0;j<t.columns;j++)
-            cout << setw(3) << t.map[i][j];
-        cout << "\n";
+            os << setw(3) << t.map[i][j];
+        os << "\n";
     }
     return os;
 }
@@ -188,7 +190,94 @@ bool TreasureHunt::runOneRound() {
 
 void TreasureHunt::run() {
     bool status;
+    ofstream log("log.txt");
     do {
+        log << *this << "\n";
         status = this->runOneRound();
     }while(this->treasureCount && status);
+    log.close();
+}
+
+/*
+ * Treasure Hunt Normal
+ */
+
+/**
+ *
+ * @param rows int map rows
+ * @param columns int map columns
+ */
+TreasureHuntNormal::TreasureHuntNormal(int rows, int columns) {
+    this->init();
+    this->createMap(rows, columns);
+}
+/**
+ *
+ * @param rows int map rows
+ * @param columns int map columns
+ */
+void TreasureHuntNormal::createMap(int rows, int columns) {
+    this->rows = rows;
+    this->columns = columns;
+    this->map = new int* [rows];
+    int i,j;
+    for(i=0; i<rows; i++) {
+        this->map[i] = new int [columns];
+    }
+    for(i=0;i<rows;i++)
+        for(j=0;j<columns;j++)
+            this->map[i][j] = 0;
+    this->addHunter(0, 0);
+    this->addHunter(0, columns-1);
+    this->addHunter(rows-1, 0);
+    this->addHunter(rows-1, columns-1);
+    for(i=1;i<=TRASURES;i++)
+        this->addTreasure();
+}
+
+/*
+ * Treasure Hunt Obstacles
+ */
+
+/**
+ *
+ * @param rows int map rows
+ * @param columns int map columns
+ */
+TreasureHuntObs::TreasureHuntObs(int rows, int columns) {
+    this->init();
+    this->createMap(rows, columns);
+}
+/**
+ *
+ * @param rows int map rows
+ * @param columns int map columns
+ */
+void TreasureHuntObs::createMap(int rows, int columns) {
+    this->rows = rows;
+    this->columns = columns;
+    this->map = new int* [rows];
+    int i,j;
+    for(i=0; i<rows; i++) {
+        this->map[i] = new int [columns];
+    }
+    for(i=0;i<rows;i++)
+        for(j=0;j<columns;j++)
+            this->map[i][j] = 0;
+
+    //Add obstacles
+    i = this->random(1, (rows+columns)/10 + 2 );
+    for(j = 1; j <= i; j++) {
+        int x,y;
+        x = this->random(0, rows-1);
+        y = this->random(0, columns-1);
+        this->map[x][y] = -1;
+    }
+
+    this->addHunter(0, 0);
+    this->addHunter(0, columns-1);
+    this->addHunter(rows-1, 0);
+    this->addHunter(rows-1, columns-1);
+    for(i=1;i<=TRASURES;i++)
+        this->addTreasure();
 }
