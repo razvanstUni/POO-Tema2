@@ -118,7 +118,7 @@ void TreasureHunt::addTreasure() {
  * @param i - Hunter ID
  * @return bool - true if Hunter can move or false if Hunter can't
  */
-bool TreasureHunt::hunterCanMove(int i) {
+bool TreasureHunt::hunterCanMove(const int i) {
     int x,y;
     x = this->hunters[i].getX();
     y = this->hunters[i].getY();
@@ -137,7 +137,7 @@ bool TreasureHunt::hunterCanMove(int i) {
  * @param hunterID - Hunter ID
  * @return int - < 0 if error, 0 if no error and no treasure found, > 0 if no error and treasure found
  */
-int TreasureHunt::moveHunter(int hunterID) {
+int TreasureHunt::moveHunter(const int hunterID) {
     if(!this->hunterCanMove(hunterID) || !this->hunters[ hunterID ].isActive()) return -1;
     int x,y,xx,yy, direction;
     xx = x = this->hunters[ hunterID ].getX();
@@ -172,7 +172,7 @@ int TreasureHunt::moveHunter(int hunterID) {
  * @param hunterID - Hunter ID
  * @return int
  */
-int TreasureHunt::getHunterScore(int hunterID) {
+int TreasureHunt::getHunterScore(const int hunterID) {
     return this->hunters[ hunterID ].getScore();
 }
 /**
