@@ -26,6 +26,7 @@ protected:
     int moveHunter(int);
     bool hunterCanMove(int);
     virtual void createMap(int, int) = 0;
+    bool hunterCanMoveInDirection(int, int);
 public:
     TreasureHunt();
     TreasureHunt(int, int);

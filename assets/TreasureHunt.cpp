@@ -113,6 +113,25 @@ void TreasureHunt::addTreasure() {
     this->map[x][y] = this->random(1, MAX_TREASURE);
     this->treasureCount++;
 }
+
+bool TreasureHunt::hunterCanMoveInDirection(int hunterID, int direction) {
+    switch(direction) {
+        case 1:
+            if(hunterID >= 3) return true;
+            break;
+        case 2:
+            if(hunterID == 1 || hunterID == 3) return true;
+            break;
+        case 3:
+            if(hunterID <= 2) return true;
+            break;
+
+        case 4:
+            if(hunterID == 2 || hunterID == 4) return true;
+            break;
+    }
+    return false;
+}
 /**
  *
  * @param i - Hunter ID
@@ -122,13 +141,13 @@ bool TreasureHunt::hunterCanMove(const int i) {
     int x,y;
     x = this->hunters[i].getX();
     y = this->hunters[i].getY();
-    if(x > 0 && this->map[x-1][y] >= 0 )
+    if(x > 0 && this->map[x-1][y] >= 0 && this->hunterCanMoveInDirection(up, i) )
         return true;
-    else if(x < this->rows-1 && this->map[x+1][y] >= 0 )
+    else if(x < this->rows-1 && this->map[x+1][y] >= 0 && this->hunterCanMoveInDirection(down, i) )
         return true;
-    else if(y > 0 && this->map[x][y-1] >= 0 )
+    else if(y > 0 && this->map[x][y-1] >= 0 && this->hunterCanMoveInDirection(left, i) )
         return true;
-    else if(y < this->columns-1 && this->map[x][y+1] >= 0 )
+    else if(y < this->columns-1 && this->map[x][y+1] >= 0 && this->hunterCanMoveInDirection(right, i) )
         return true;
     return false;
 }
@@ -143,7 +162,7 @@ int TreasureHunt::moveHunter(const int hunterID) {
     xx = x = this->hunters[ hunterID ].getX();
     yy = y = this->hunters[ hunterID ].getY();
     do {
-        direction = random(1,5);
+        do { direction = random(1,5); }while( !this->hunterCanMoveInDirection(direction, hunterID) );
         if(direction == up && x>0)
             x--;
         else if(direction == right && y<this->columns-1)
