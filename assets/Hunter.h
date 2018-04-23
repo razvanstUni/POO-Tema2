@@ -8,14 +8,16 @@
 #endif //POO_TEMA2_HUNTER_H
 
 class Hunter {
+protected:
     int x;
     int y;
     int score;
     bool active;
     void init();
+    bool direction[5];
+    enum directions {up=1, right, down, left};
 public:
     Hunter();
-    Hunter(int, int);
     void setLocation(int, int);
     int getX();
     int getY();
@@ -23,4 +25,25 @@ public:
     int getScore();
     bool isActive();
     void setActiveStatus(bool);
+    bool hunterCanMoveInDirection(int);
+};
+
+class HunterTL : public Hunter {
+public:
+    HunterTL();
+};
+
+class HunterTR : public Hunter {
+public:
+    HunterTR();
+};
+
+class HunterBL : public Hunter {
+public:
+    HunterBL();
+};
+
+class HunterBR : public Hunter {
+public:
+    HunterBR();
 };

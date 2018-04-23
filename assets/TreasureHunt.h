@@ -8,25 +8,26 @@
 #endif //POO_TEMA2_TREASUREHUNT_H
 
 #include <random>
+
 using namespace std;
 
 class TreasureHunt {
 protected:
     int **map;
     int rows, columns;
-    Hunter hunters[4];
+    Hunter* hunters[ HUNTERS ];
     int hunterCount;
     int treasureCount;
     enum directions {up=1, right, down, left};
+    enum types {TL=1, TR, BL, BR};
 
     void init();
     int random(int, int);
-    void addHunter(int, int);
+    void addHunter(int, int, int);
     void addTreasure();
     int moveHunter(int);
     bool hunterCanMove(int);
     virtual void createMap(int, int) = 0;
-    bool hunterCanMoveInDirection(int, int);
 public:
     TreasureHunt();
     TreasureHunt(int, int);

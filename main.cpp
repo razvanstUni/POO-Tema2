@@ -4,6 +4,8 @@
 #define HUNTERS 4 //Number of hunters on the map
 #define TRASURES 3 //Number of treasures on the map
 
+#define DEBUG false
+
 #include "assets/Hunter.cpp"
 #include "assets/TreasureHunt.cpp";
 using namespace std;
@@ -22,21 +24,26 @@ int main() {
     cout << "\nx= "; cin >> x;
     cout << "\ny= "; cin >> y;
 
+    TreasureHunt *t;
+
     if( select == 1) {
-        TreasureHuntNormal t(x,y);
-        cout << t;
-        t.run();
-        cout << t;
-        for(int i=0; i<HUNTERS; i++)
-            cout << "Hunter " << i << " - Treasure: " << (t.getHunterScore(i) ? "YES" : "NO") << endl;
+        t = new TreasureHuntNormal(x,y);
     } else if( select == 2 ) {
-        TreasureHuntObs t(x,y);
-        cout << t;
-        t.run();
-        cout << t;
-        for(int i=0; i<HUNTERS; i++)
-            cout << "Hunter " << i << " - Treasure: " << (t.getHunterScore(i) ? "YES" : "NO") << endl;
+        t = new TreasureHuntObs(x,y);
     }
+
+    cout << *t;
+    if( !DEBUG )
+        t->run();
+    else {
+        int i,maxSteps;
+        cout << "\n--- Sunteti in modul DEBUG --- \nIntroduceti numarul de pasi pe care doriti sa ii executati: "; cin >> maxSteps;
+        for( i = 1; i <= maxSteps && t->runOneRound(); i++);
+        cout << "\n--- Pasul " << maxSteps << " ";
+    }
+    cout << *t;
+    for(int i=0; i<HUNTERS; i++)
+        cout << "Hunter " << i << " - Treasure: " << (t->getHunterScore(i) ? "YES" : "NO") << endl;
 
 
     return 0;

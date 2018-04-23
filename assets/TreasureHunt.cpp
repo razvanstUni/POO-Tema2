@@ -43,7 +43,7 @@ ostream& operator<<(ostream& os, TreasureHunt& t)
 {
     int i,j,activeHunters = 0;
     for(i=0;i<HUNTERS;i++)
-        if(t.hunters[i].isActive()) activeHunters++;
+        if(t.hunters[i]->isActive()) activeHunters++;
 
     os << "--- Active hunters: " << activeHunters << " - Treasures left: " << t.treasureCount << " ---\n";
     for(i=0;i<t.rows;i++) {
@@ -70,35 +70,28 @@ int TreasureHunt::random(int min, int max) {
 }
 /**
  *
- * @param rows int - map rows
- * @param columns int - map columns
- */
-void TreasureHunt::createMap(int rows, int columns) {
-    this->rows = rows;
-    this->columns = columns;
-    this->map = new int* [rows];
-    int i,j;
-    for(i=0; i<rows; i++) {
-        this->map[i] = new int [columns];
-    }
-    for(i=0;i<rows;i++)
-        for(j=0;j<columns;j++)
-            this->map[i][j] = 0;
-        this->addHunter(0, 0);
-        this->addHunter(0, columns-1);
-        this->addHunter(rows-1, 0);
-        this->addHunter(rows-1, columns-1);
-        for(i=1;i<=TRASURES;i++)
-            this->addTreasure();
-}
-/**
- *
  * @param x int - x position on the map
  * @param y int - y position on the map
  */
-void TreasureHunt::addHunter(int x, int y) {
+void TreasureHunt::addHunter(int x, int y, int type) {
     if(!map || this->hunterCount >= HUNTERS) return;
-    this->hunters[ this->hunterCount ].setLocation(x, y);
+
+    switch(type) {
+        case 1:
+            this->hunters[this->hunterCount] = new HunterTL;
+            break;
+        case 2:
+            this->hunters[this->hunterCount] = new HunterTR;
+            break;
+        case 3:
+            this->hunters[this->hunterCount] = new HunterBL;
+            break;
+        case 4:
+            this->hunters[this->hunterCount] = new HunterBR;
+            break;
+    }
+
+    this->hunters[ this->hunterCount ]->setLocation(x, y);
     this->hunterCount++;
     this->map[x][y] = -1;
 }
@@ -113,25 +106,6 @@ void TreasureHunt::addTreasure() {
     this->map[x][y] = this->random(1, MAX_TREASURE);
     this->treasureCount++;
 }
-
-bool TreasureHunt::hunterCanMoveInDirection(int hunterID, int direction) {
-    switch(direction) {
-        case 1:
-            if(hunterID >= 3) return true;
-            break;
-        case 2:
-            if(hunterID == 1 || hunterID == 3) return true;
-            break;
-        case 3:
-            if(hunterID <= 2) return true;
-            break;
-
-        case 4:
-            if(hunterID == 2 || hunterID == 4) return true;
-            break;
-    }
-    return false;
-}
 /**
  *
  * @param i - Hunter ID
@@ -139,15 +113,15 @@ bool TreasureHunt::hunterCanMoveInDirection(int hunterID, int direction) {
  */
 bool TreasureHunt::hunterCanMove(const int i) {
     int x,y;
-    x = this->hunters[i].getX();
-    y = this->hunters[i].getY();
-    if(x > 0 && this->map[x-1][y] >= 0 && this->hunterCanMoveInDirection(up, i) )
+    x = this->hunters[i]->getX();
+    y = this->hunters[i]->getY();
+    if(x > 0 && this->map[x-1][y] >= 0 && this->hunters[i]->hunterCanMoveInDirection(up) )
         return true;
-    else if(x < this->rows-1 && this->map[x+1][y] >= 0 && this->hunterCanMoveInDirection(down, i) )
+    else if(x < this->rows-1 && this->map[x+1][y] >= 0 && this->hunters[i]->hunterCanMoveInDirection(down) )
         return true;
-    else if(y > 0 && this->map[x][y-1] >= 0 && this->hunterCanMoveInDirection(left, i) )
+    else if(y > 0 && this->map[x][y-1] >= 0 && this->hunters[i]->hunterCanMoveInDirection(left) )
         return true;
-    else if(y < this->columns-1 && this->map[x][y+1] >= 0 && this->hunterCanMoveInDirection(right, i) )
+    else if(y < this->columns-1 && this->map[x][y+1] >= 0 && this->hunters[i]->hunterCanMoveInDirection(right) )
         return true;
     return false;
 }
@@ -157,12 +131,12 @@ bool TreasureHunt::hunterCanMove(const int i) {
  * @return int - < 0 if error, 0 if no error and no treasure found, > 0 if no error and treasure found
  */
 int TreasureHunt::moveHunter(const int hunterID) {
-    if(!this->hunterCanMove(hunterID) || !this->hunters[ hunterID ].isActive()) return -1;
+    if(!this->hunterCanMove(hunterID) || !this->hunters[ hunterID ]->isActive()) return -1;
     int x,y,xx,yy, direction;
-    xx = x = this->hunters[ hunterID ].getX();
-    yy = y = this->hunters[ hunterID ].getY();
+    xx = x = this->hunters[ hunterID ]->getX();
+    yy = y = this->hunters[ hunterID ]->getY();
     do {
-        do { direction = random(1,5); }while( !this->hunterCanMoveInDirection(direction, hunterID) );
+        do { direction = random(1,5); }while( !this->hunters[ hunterID ]->hunterCanMoveInDirection(direction) );
         if(direction == up && x>0)
             x--;
         else if(direction == right && y<this->columns-1)
@@ -174,12 +148,12 @@ int TreasureHunt::moveHunter(const int hunterID) {
         if(this->map[x][y] < 0) { x = xx; y = yy;}
     }while(x == xx && y == yy);
     this->map[xx][yy] = -1;
-    this->hunters[ hunterID ].setLocation(x, y);
+    this->hunters[ hunterID ]->setLocation(x, y);
     if(this->map[x][y] > 0) {
-        this->hunters[ hunterID ].addScore( this->map[x][y] );
+        this->hunters[ hunterID ]->addScore( this->map[x][y] );
         this->treasureCount--;
         this->map[ x ][ y ] = -1;
-        this->hunters[ hunterID ].setActiveStatus(false);
+        this->hunters[ hunterID ]->setActiveStatus(false);
         return 5;
     } else {
         this->map[ x ][ y ] = -2;
@@ -192,7 +166,7 @@ int TreasureHunt::moveHunter(const int hunterID) {
  * @return int
  */
 int TreasureHunt::getHunterScore(const int hunterID) {
-    return this->hunters[ hunterID ].getScore();
+    return this->hunters[ hunterID ]->getScore();
 }
 /**
  *
@@ -246,10 +220,10 @@ void TreasureHuntNormal::createMap(int rows, int columns) {
     for(i=0;i<rows;i++)
         for(j=0;j<columns;j++)
             this->map[i][j] = 0;
-    this->addHunter(0, 0);
-    this->addHunter(0, columns-1);
-    this->addHunter(rows-1, 0);
-    this->addHunter(rows-1, columns-1);
+    this->addHunter(0, 0, this->TR);
+    this->addHunter(0, columns-1, this->TL);
+    this->addHunter(rows-1, 0, this->BL);
+    this->addHunter(rows-1, columns-1, this->BR);
     for(i=1;i<=TRASURES;i++)
         this->addTreasure();
 }
@@ -293,10 +267,10 @@ void TreasureHuntObs::createMap(int rows, int columns) {
         this->map[x][y] = -1;
     }
 
-    this->addHunter(0, 0);
-    this->addHunter(0, columns-1);
-    this->addHunter(rows-1, 0);
-    this->addHunter(rows-1, columns-1);
+    this->addHunter(0, 0, this->TR);
+    this->addHunter(0, columns-1, this->TL);
+    this->addHunter(rows-1, 0, this->BL);
+    this->addHunter(rows-1, columns-1, this->BR);
     for(i=1;i<=TRASURES;i++)
         this->addTreasure();
 }

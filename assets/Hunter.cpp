@@ -5,15 +5,13 @@
 void Hunter::init() {
     this->score = 0;
     this->active = true;
+    int i;
+    for(i=1;i<=4;i++)
+        this->direction[i] = false;
 }
 Hunter::Hunter() {
     this->x = -1;
     this->y = -1;
-    this->init();
-}
-Hunter::Hunter(int x, int y) {
-    this->x = x;
-    this->y = y;
     this->init();
 }
 /**
@@ -66,4 +64,43 @@ bool Hunter::isActive() {
  */
 void Hunter::setActiveStatus(bool status) {
     this->active = status;
+}
+/**
+ *
+ * @param dir int
+ * @return bool
+ */
+bool Hunter::hunterCanMoveInDirection(int dir) {
+    return this->direction[ dir ];
+}
+
+/*
+ * Hunter Top Left
+ */
+HunterTL::HunterTL() {
+    this->direction[ right ] = true;
+    this->direction[ down ] = true;
+}
+/*
+ * Hunter Top Right
+ */
+HunterTR::HunterTR() {
+    this->direction[ left ] = true;
+    this->direction[ down ] = true;
+}
+
+/*
+ * Hunter Bottom Left
+ */
+HunterBL::HunterBL() {
+    this->direction[ right ] = true;
+    this->direction[ up ] = true;
+}
+
+/*
+ * Hunter Bottom Right
+ */
+HunterBR::HunterBR() {
+    this->direction[ left ] = true;
+    this->direction[ up ] = true;
 }
