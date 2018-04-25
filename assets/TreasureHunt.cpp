@@ -47,8 +47,11 @@ ostream& operator<<(ostream& os, TreasureHunt& t)
 
     os << "--- Active hunters: " << activeHunters << " - Treasures left: " << t.treasureCount << " ---\n";
     for(i=0;i<t.rows;i++) {
-        for(j=0;j<t.columns;j++)
-            os << setw(3) << t.map[i][j];
+        for(j=0;j<t.columns;j++) {
+            os << setw(3);
+            if( t.map[i][j] == -2 ) os << "X";
+            else os << t.map[i][j];
+        }
         os << "\n";
     }
     return os;
@@ -132,21 +135,25 @@ bool TreasureHunt::hunterCanMove(const int i) {
  */
 int TreasureHunt::moveHunter(const int hunterID) {
     if(!this->hunterCanMove(hunterID) || !this->hunters[ hunterID ]->isActive()) return -1;
-    int x,y,xx,yy, direction;
+    int x,y,xx,yy, direction; bool forceDirection = false;
     xx = x = this->hunters[ hunterID ]->getX();
     yy = y = this->hunters[ hunterID ]->getY();
-    do {
-        do { direction = random(1,5); }while( !this->hunters[ hunterID ]->hunterCanMoveInDirection(direction) );
-        if(direction == up && x>0)
-            x--;
-        else if(direction == right && y<this->columns-1)
-            y++;
-        else if(direction == down && x<this->rows-1)
-            x++;
-        else if(direction == left && y>0)
-            y--;
-        if(this->map[x][y] < 0) { x = xx; y = yy;}
-    }while(x == xx && y == yy);
+    direction = this->hunters[ hunterID ]->checkForTreasureNear(x, y, this->map, this->rows, this->columns);
+    if( direction > 0 ) forceDirection = true;
+        do {
+            if( !forceDirection ) {
+                do { direction = random(1, 5); } while (!this->hunters[hunterID]->hunterCanMoveInDirection(direction));
+            }
+            if(direction == up && x>0)
+                x--;
+            else if(direction == right && y<this->columns-1)
+                y++;
+            else if(direction == down && x<this->rows-1)
+                x++;
+            else if(direction == left && y>0)
+                y--;
+            if(this->map[x][y] < 0) { x = xx; y = yy;}
+        }while(x == xx && y == yy);
     this->map[xx][yy] = -1;
     this->hunters[ hunterID ]->setLocation(x, y);
     if(this->map[x][y] > 0) {
